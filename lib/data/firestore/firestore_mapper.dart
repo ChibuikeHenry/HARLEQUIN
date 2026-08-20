@@ -31,6 +31,7 @@ class FirestoreMapper {
     required String uniqueLink,
     required String slug,
     required bool isCreate,
+    String logoUrl = '',
   }) {
     return {
       FirestoreFields.ownerId: ownerId,
@@ -39,6 +40,7 @@ class FirestoreMapper {
       FirestoreFields.phone: phone,
       FirestoreFields.uniqueLink: uniqueLink,
       FirestoreFields.slug: slug,
+      if (logoUrl.isNotEmpty) FirestoreFields.logoUrl: logoUrl,
       FirestoreFields.updatedAt: FieldValue.serverTimestamp(),
       if (isCreate) FirestoreFields.createdAt: FieldValue.serverTimestamp(),
     };
@@ -83,6 +85,7 @@ class FirestoreMapper {
       phone: data[FirestoreFields.phone] as String? ?? '',
       uniqueLink: data[FirestoreFields.uniqueLink] as String? ?? '',
       slug: data[FirestoreFields.slug] as String? ?? '',
+      logoUrl: data[FirestoreFields.logoUrl] as String? ?? '',
       initial: name.isEmpty ? 'B' : name[0].toUpperCase(),
     );
   }

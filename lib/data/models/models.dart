@@ -76,6 +76,7 @@ class Business {
     required this.phone,
     required this.uniqueLink,
     required this.slug,
+    this.logoUrl = '',
     this.initial = 'K',
   });
 
@@ -85,6 +86,7 @@ class Business {
   final String phone;
   final String uniqueLink;
   final String slug;
+  final String logoUrl;
   final String initial;
 
   Business copyWith({
@@ -94,6 +96,7 @@ class Business {
     String? phone,
     String? uniqueLink,
     String? slug,
+    String? logoUrl,
     String? initial,
   }) {
     return Business(
@@ -103,6 +106,7 @@ class Business {
       phone: phone ?? this.phone,
       uniqueLink: uniqueLink ?? this.uniqueLink,
       slug: slug ?? this.slug,
+      logoUrl: logoUrl ?? this.logoUrl,
       initial: initial ?? this.initial,
     );
   }

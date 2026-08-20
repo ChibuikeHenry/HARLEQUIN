@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 
 import '../../data/models/models.dart';
@@ -182,6 +184,69 @@ class AppCard extends StatelessWidget {
   }
 }
 
+class BusinessAvatar extends StatelessWidget {
+  const BusinessAvatar({
+    super.key,
+    required this.business,
+    this.radius = 16,
+    this.backgroundColor = AppColors.orange,
+    this.foregroundColor = AppColors.white,
+    this.previewBytes,
+  });
+
+  final Business business;
+  final double radius;
+  final Color backgroundColor;
+  final Color foregroundColor;
+  final Uint8List? previewBytes;
+
+  @override
+  Widget build(BuildContext context) {
+    if (previewBytes != null) {
+      return CircleAvatar(
+        radius: radius,
+        backgroundImage: MemoryImage(previewBytes!),
+      );
+    }
+
+    if (business.logoUrl.isNotEmpty) {
+      return CircleAvatar(
+        radius: radius,
+        backgroundColor: backgroundColor,
+        child: ClipOval(
+          child: Image.network(
+            business.logoUrl,
+            width: radius * 2,
+            height: radius * 2,
+            fit: BoxFit.cover,
+            errorBuilder: (_, _, _) => Text(
+              business.initial,
+              style: TextStyle(
+                color: foregroundColor,
+                fontWeight: FontWeight.w700,
+                fontSize: radius * 0.9,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return CircleAvatar(
+      radius: radius,
+      backgroundColor: backgroundColor,
+      child: Text(
+        business.initial,
+        style: TextStyle(
+          color: foregroundColor,
+          fontWeight: FontWeight.w700,
+          fontSize: radius * 0.9,
+        ),
+      ),
+    );
+  }
+}
+
 class BusinessBadge extends StatelessWidget {
   const BusinessBadge({super.key, required this.business});
 
@@ -189,9 +254,6 @@ class BusinessBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name = business.name;
-    final initial = business.initial;
-
     return Container(
       padding: const EdgeInsets.fromLTRB(10, 8, 12, 8),
       decoration: BoxDecoration(
@@ -201,20 +263,10 @@ class BusinessBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CircleAvatar(
-            radius: 16,
-            backgroundColor: AppColors.orange,
-            child: Text(
-              initial,
-              style: const TextStyle(
-                color: AppColors.white,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
+          BusinessAvatar(business: business),
           const SizedBox(width: 10),
           Text(
-            name,
+            business.name,
             style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
           ),
           const SizedBox(width: 8),

@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 
 import '../models/models.dart';
 import '../services/firestore_service.dart';
+import '../services/storage_service.dart';
 
 class AuthRepository {
   AuthRepository({
@@ -138,10 +139,14 @@ class AuthRepository {
 }
 
 class AppRepository {
-  AppRepository({FirestoreService? firestore})
-      : _firestore = firestore ?? FirestoreService();
+  AppRepository({
+    FirestoreService? firestore,
+    StorageService? storage,
+  })  : _firestore = firestore ?? FirestoreService(),
+        _storage = storage ?? StorageService();
 
   final FirestoreService _firestore;
+  final StorageService _storage;
 
   Future<DashboardStats> fetchStats(String businessId) =>
       _firestore.fetchStats(businessId);
@@ -151,6 +156,17 @@ class AppRepository {
 
   Future<Business> updateBusiness(Business business) =>
       _firestore.updateBusiness(business);
+
+  Future<String> uploadBusinessLogo({
+    required String businessId,
+    required Uint8List bytes,
+    required String fileName,
+  }) =>
+      _storage.uploadBusinessLogo(
+        businessId: businessId,
+        bytes: bytes,
+        fileName: fileName,
+      );
 
   Future<String> saveUniqueLink({
     required String businessId,

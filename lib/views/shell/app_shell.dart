@@ -108,17 +108,7 @@ class SideNav extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    CircleAvatar(
-                      radius: 16,
-                      backgroundColor: AppColors.orange,
-                      child: Text(
-                        business!.initial,
-                        style: const TextStyle(
-                          color: AppColors.white,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
+                    BusinessAvatar(business: business!, radius: 16),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(

@@ -109,6 +109,7 @@ class FirestoreService {
       FirestoreFields.slug: business.slug.isEmpty
           ? slugFromBusinessName(business.name)
           : business.slug,
+      FirestoreFields.logoUrl: business.logoUrl,
       FirestoreFields.updatedAt: FieldValue.serverTimestamp(),
     });
     return business.copyWith(

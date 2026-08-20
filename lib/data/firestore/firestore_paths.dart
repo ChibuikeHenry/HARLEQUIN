@@ -15,6 +15,7 @@ abstract final class FirestoreFields {
   static const phone = 'phone';
   static const uniqueLink = 'uniqueLink';
   static const slug = 'slug';
+  static const logoUrl = 'logoUrl';
   static const type = 'type';
   static const customerName = 'customerName';
   static const subject = 'subject';

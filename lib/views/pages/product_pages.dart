@@ -480,28 +480,47 @@ class BusinessProfileView extends StatelessWidget {
                     LayoutBuilder(
                       builder: (context, constraints) {
                         final stacked = constraints.maxWidth < 640;
-                        final avatar = const CircleAvatar(
-                          radius: 56,
-                          backgroundColor: Color(0xFFD9D9D9),
+                        final avatar = _ProfileAvatar(
+                          business: business,
+                          previewBytes: vm.pendingLogoBytes,
+                          onTap: vm.isBusy ? null : vm.pickLogo,
                         );
                         final fields = Column(
                           children: [
                             HqTextField(
                               label: 'Business Name',
-                              hint: '',
-                              onChanged: vm.updateName,
+                              hint: 'Your business name',
+                              controller: vm.nameController,
+                              errorText: vm.nameError,
+                              onChanged: (_) {
+                                vm.saved = false;
+                                vm.nameError = null;
+                                vm.notifyListeners();
+                              },
                             ),
                             const SizedBox(height: 12),
                             HqTextField(
                               label: 'Business Email',
-                              hint: '',
-                              onChanged: vm.updateEmail,
+                              hint: 'name@yourbusiness.com',
+                              keyboardType: TextInputType.emailAddress,
+                              controller: vm.emailController,
+                              errorText: vm.emailError,
+                              onChanged: (_) {
+                                vm.saved = false;
+                                vm.emailError = null;
+                                vm.notifyListeners();
+                              },
                             ),
                             const SizedBox(height: 12),
                             HqTextField(
                               label: 'Phone Number',
-                              hint: '',
-                              onChanged: vm.updatePhone,
+                              hint: '+234 800 000 0000',
+                              keyboardType: TextInputType.phone,
+                              controller: vm.phoneController,
+                              onChanged: (_) {
+                                vm.saved = false;
+                                vm.notifyListeners();
+                              },
                             ),
                           ],
                         );
@@ -526,6 +545,16 @@ class BusinessProfileView extends StatelessWidget {
                         );
                       },
                     ),
+                    if (vm.errorMessage != null) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        vm.errorMessage!,
+                        style: const TextStyle(
+                          color: AppColors.complaint,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 20),
                     SizedBox(
                       width: 160,
@@ -543,16 +572,71 @@ class BusinessProfileView extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
-              const SizedBox(
-                height: 160,
-                width: double.infinity,
-                child: AppCard(child: SizedBox.shrink()),
-              ),
             ],
           ),
         );
       },
+    );
+  }
+}
+
+class _ProfileAvatar extends StatelessWidget {
+  const _ProfileAvatar({
+    required this.business,
+    this.previewBytes,
+    this.onTap,
+  });
+
+  final Business business;
+  final Uint8List? previewBytes;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(56),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              BusinessAvatar(
+                business: business,
+                radius: 56,
+                backgroundColor: const Color(0xFFD9D9D9),
+                foregroundColor: AppColors.navy,
+                previewBytes: previewBytes,
+              ),
+              Positioned(
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: const BoxDecoration(
+                    color: AppColors.navy,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.camera_alt_outlined,
+                    color: AppColors.white,
+                    size: 16,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Upload photo',
+          style: TextStyle(
+            fontSize: 12,
+            color: onTap == null ? AppColors.muted : AppColors.navy,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
     );
   }
 }

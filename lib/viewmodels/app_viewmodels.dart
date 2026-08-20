@@ -1,5 +1,11 @@
 import 'package:flutter/widgets.dart';
 
+import 'dart:typed_data';
+
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
+
+import '../data/firestore/firestore_mapper.dart';
 import '../data/models/models.dart';
 import '../data/repositories/app_repository.dart';
 import 'base_viewmodel.dart';
@@ -111,50 +117,79 @@ class ProfileViewModel extends BaseViewModel {
   final AppRepository _repository;
   Business business;
 
-  late String name;
-  late String email;
-  late String phone;
+  final nameController = TextEditingController();
+  final emailController = TextEditingController();
+  final phoneController = TextEditingController();
+
+  Uint8List? pendingLogoBytes;
+  String? pendingLogoName;
   bool saved = false;
+  String? nameError;
+  String? emailError;
 
   @override
   Future<void> init() async {
-    name = business.name;
-    email = business.email;
-    phone = business.phone;
+    nameController.text = business.name;
+    emailController.text = business.email;
+    phoneController.text = business.phone;
     notifyListeners();
   }
 
-  void updateName(String value) {
-    name = value;
-    saved = false;
-    notifyListeners();
-  }
+  Future<void> pickLogo() async {
+    final file = await FilePicker.pickFile(type: FileType.image);
+    if (file == null) {
+      return;
+    }
 
-  void updateEmail(String value) {
-    email = value;
+    final bytes = await file.readAsBytes();
+    pendingLogoBytes = bytes;
+    pendingLogoName = file.name;
     saved = false;
-    notifyListeners();
-  }
-
-  void updatePhone(String value) {
-    phone = value;
-    saved = false;
+    setError(null);
     notifyListeners();
   }
 
   Future<Business?> save() async {
+    final name = nameController.text.trim();
+    final email = emailController.text.trim();
+    final phone = phoneController.text.trim();
+
+    nameError = name.isEmpty ? 'Enter your business name.' : null;
+    emailError = email.isEmpty
+        ? 'Enter your business email.'
+        : email.contains('@')
+            ? null
+            : 'Enter a valid business email.';
+    notifyListeners();
+    if (nameError != null || emailError != null) {
+      return null;
+    }
+
     setBusy(true);
     setError(null);
     try {
+      var logoUrl = business.logoUrl;
+      if (pendingLogoBytes != null) {
+        logoUrl = await _repository.uploadBusinessLogo(
+          businessId: business.id,
+          bytes: pendingLogoBytes!,
+          fileName: pendingLogoName ?? 'logo.jpg',
+        );
+      }
+
       final updated = await _repository.updateBusiness(
         business.copyWith(
           name: name,
           email: email,
           phone: phone,
+          logoUrl: logoUrl,
+          slug: slugFromBusinessName(name),
           initial: name.isEmpty ? business.initial : name[0].toUpperCase(),
         ),
       );
       business = updated;
+      pendingLogoBytes = null;
+      pendingLogoName = null;
       saved = true;
       return updated;
     } on Object {
@@ -163,6 +198,14 @@ class ProfileViewModel extends BaseViewModel {
     } finally {
       setBusy(false);
     }
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    emailController.dispose();
+    phoneController.dispose();
+    super.dispose();
   }
 }
 
