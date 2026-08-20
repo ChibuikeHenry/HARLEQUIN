@@ -23,18 +23,30 @@ class AuthRepository {
   /// Ensures Firebase Auth is initialized (required on web before sign-in/up).
   static Future<void> ensureAuthReady([FirebaseAuth? auth]) async {
     final firebaseAuth = auth ?? FirebaseAuth.instance;
+    
     if (kIsWeb) {
       try {
         await firebaseAuth.setPersistence(Persistence.LOCAL);
-      } on FirebaseAuthException {
-        // Persistence may already be configured for this tab.
+      } on Object {
+        // Persistence may already be configured.
       }
     }
 
+    // Wait for the auth state to settle, which ensures the platform channel is ready.
     try {
-      await firebaseAuth.authStateChanges().first.timeout(const Duration(seconds: 5));
+      await firebaseAuth
+          .authStateChanges()
+          .first
+          .timeout(const Duration(seconds: 20));
+      
+      // Small additional delay for the Pigeon host API to register fully on web.
+      if (kIsWeb) {
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
     } on TimeoutException {
-      // Auth may have emitted before we subscribed; currentUser is still valid.
+      debugPrint('Auth initialization timed out, proceeding anyway.');
+    } catch (e) {
+      debugPrint('Auth initialization error: $e');
     }
   }
 

@@ -2,6 +2,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 abstract final class AuthErrors {
   static String message(Object error) {
+    final errorStr = error.toString();
+    if (errorStr.contains('FirebaseAuthHostApi') ||
+        errorStr.contains('channel-error')) {
+      return 'Authentication is still starting. Refresh the page and try again.';
+    }
+
     if (error is FirebaseAuthException) {
       return switch (error.code) {
         'invalid-email' => 'Enter a valid business email.',
